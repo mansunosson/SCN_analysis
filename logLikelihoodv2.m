@@ -1,4 +1,4 @@
-%LogLikelihood given by EKBF for Per Transcription
+%LogLikelihood given by EKBF for Transcription
 function logLik = logLikelihoodv2(dt,data,R0,Kp,np,degr,meanG,sdG,maxd,kappa,sigmae,samp)
                               
 if (R0<0)|| (Kp<0) || (np<0) || (degr<0) || (meanG<0) || (meanG>23) || (sdG<0) || (sdG>20) ||  (kappa<0)|| (sigmae<0) 
