@@ -13,7 +13,6 @@ CARmcmc.m is the main function that calls:
     Uprior.m:          Evaluates the uniform pdf for "par" with upper bound "b" and lower bound "a".
     multNprior.m:      Evaluates the log multivariate normal pdf for "par" with mean "a" and covariance "b".
 
-LBMGR.mat is used to calculate lugsail batch means effective sample sizes from a serially correlated MCMC chain.
 PPLC.mat is used to calculate the posterior probability of a limit cycle.
 SDEsolve.mat is used to simulate ensembles of the model in Eq. (1).
 
