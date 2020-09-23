@@ -1,6 +1,10 @@
 # SCN_analysis
 Matlab code for analyzing circadian SCN imaging data
 
+run_code_rep1.m : These scripts contain data pre-processing for each of the experimental replicates and calls the function CARmcmc.m 
+run_code_rep2.m : lines 58-101 make sure that the initial values are in dense regions of the posterior. This is not required for the analysis 
+run_code_rep3.m : but reduces the required number of iterations by shortening the time the chains spend in a transient phase.
+
 
 CARmcmc.m is the main function that calls:
     CARprior.m:        Takes as input a set of random effects (RE) and variance (tau) and evaluates the joint pdf of RE as
