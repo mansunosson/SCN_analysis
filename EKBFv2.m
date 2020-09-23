@@ -20,7 +20,7 @@ delaydt=maxd/dt; %number of states gridpoints in delay
 initY = data(1:(maxd/samp));
 initX = initY./kappa;
 %initX = interp1(samp:samp:maxd,initY,0:dt:maxd-dt)./kappa; %interp1 is
-%very expensive
+%very expensive, only use this if discretization of process is finer than data availability
 %initX(1:integr) = initX(integr+1);
 
 y=data;
@@ -53,7 +53,7 @@ M=delaydt; %this is a counter for the number of unbserved states currently predi
 ycount=maxd/samp; %this is a counter for the number of observations currently predicted
 
 t=0;
-%%obtain weights matrices for the delay
+%%obtain weights for the delay
 timegrid=0:dt:(maxd-dt);
 timegridH=(timegrid+timegrid+dt)./2;
 
@@ -72,24 +72,24 @@ for s=((maxd/samp)+1):n
     
 for j=M:(M+(integr)-1) %loop until the next observation we want to predict
     
-       %evaluate weighted tr fn from 0 to tau 
+       %evaluate weighted transcription function from 0 to tau_max 
         thInp=thI((j-delaydt+1):j);
            
         PFI=thInp*weightsMN; 
         trfun=R0./(1+(PFI/Kp)^np);
         trfunDerC=-(R0.*np.*(PFI./Kp).^(np-1))./(Kp.*(1+(PFI/Kp)^np).^2);
 
-        %%predict mean of x
+        %predict mean of process
         thI(j+1)=A*thI(j)+dt.*(trfun); 
         
-       %predict variance of x 
+       %predict variance of process 
        HH=(1-2*degr*dt)*PxxI(vv,vv);
        covmV=dt.*PxxI(vv,vv-delaydt+(1:delaydt))*(trfunDerC.*weightsMN);
        covCC=PxxI(vv-delaydt+(1:delaydt),vv-delaydt+(1:delaydt))*(trfunDerC.*weightsMN);
        DD=dt.*(degr.*thI(j)+trfun); %%diffusion matrix
        PxxI(vv+1,vv+1)=HH+2*sum(covmV)+DD; %%variance
     
-       %predict covariance of x
+       %predict covariance of process
        PxxI(vv-delaydt+(1:delaydt),vv+1)=PxxI(vv-delaydt+(1:delaydt),vv)*A'+dt.*covCC; 
        PxxI(vv+1,vv-delaydt+(1:delaydt))=PxxI(vv-delaydt+(1:delaydt),vv+1)';
 
@@ -101,10 +101,10 @@ end
 
      M=M+integr;
      
-    %covariance x,y
+    %covariance of process and observations
     Pxy=PxxI(vv-delaydt+1:vv,vv-delaydt+1:vv)*(FF(end,:))';
      
-    %variance of y
+    %variance of observations
     Pyy=(FF(end,:))*PxxI(vv-delaydt+1:vv,vv-delaydt+1:vv)*(FF(end,:))';
 
      thvec(1:integr)=thI(1,(M+1-integr):M);
@@ -113,11 +113,12 @@ end
      Pxxp((vv-integr+1):vv)=diag(PxxI((vv-integr+1):vv,(vv-integr+1):vv));
 
      
-     %use the current set of points to predict y
+     %calculate E[Yt|X_{t-1}]
      meanout(:,s)=FF(1,1:integr)*thvec';     
+     %calculate V[Yt|X_{t-1}]
      varout(:,:,s)=Pyy+sigmae.^2;
      
-    %%update
+    %%Kalman update
     ycount=ycount+1;
     ths(vv-delaydt+1:vv)=th(vv-delaydt+1:vv)'+Pxy/(Pyy+sigmae.^2)*(y(ycount)'-FF(1,1:integr)*thvec');
     Pxxs(vv-delaydt+1:vv,vv-delaydt+1:vv)=PxxI(vv-delaydt+1:vv,vv-delaydt+1:vv)-Pxy/(Pyy+sigmae.^2)*Pxy'; 
